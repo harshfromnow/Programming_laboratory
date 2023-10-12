@@ -133,18 +133,18 @@ int list_search(node* L, int k) {
 }
 
 void list_reverse(node** L) {
-    node* next = NULL;
-    node* current = *L;
-    node* prev = NULL;
+    node* nextnode = NULL;
+    node* currentnode = *L;
+    node* prevnode = NULL;
 
     while (current != NULL) {
-        next = current->next;
-        current->next = prev;
-        prev = current;
-        current = next;
+        nextnode = current->next;
+        current->next = prevnode;
+        prevnode = currentnode;
+        currentnode = nextnode;
     }
 
-    *L = prev; 
+    *L = prevnode; 
 }
 
 
