@@ -137,9 +137,9 @@ void list_reverse(node** L) {
     node* currentnode = *L;
     node* prevnode = NULL;
 
-    while (current != NULL) {
-        nextnode = current->next;
-        current->next = prevnode;
+    while (currentnode != NULL) {
+        nextnode = currentnode->next;
+        currentnode->next = prevnode;
         prevnode = currentnode;
         currentnode = nextnode;
     }
