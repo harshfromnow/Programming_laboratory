@@ -163,19 +163,19 @@ node* list_reverse_negative(node* L) {
     if (L == NULL || L->next == NULL) {
         return L;
     }
-    node* prev = NULL;
+    node* prevnode = NULL;
     node* current = L;
     node* nextnode;
     int foundnegative = 0;
     while (current != NULL) {
         nextnode = current->next;
         if (current->key < 0) {
-            current->next = prev;
-            prev = current;
+            current->next = prevnode;
+            prevnode = current;
             foundnegative = 1;
         } else {
             if (foundnegative) {
-                node* temp = prev;
+                node* temp = prevnode;
                 while (temp->next != NULL) {
                     temp = temp->next;
                 }
@@ -185,7 +185,7 @@ node* list_reverse_negative(node* L) {
         }
         current = nextnode;
     }
-    return prev; 
+    return prevnode; 
 }
 
 int main() {
