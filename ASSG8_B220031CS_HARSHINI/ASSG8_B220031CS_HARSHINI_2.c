@@ -1,191 +1,186 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct node
-{
+struct node{
     int data;
+    struct node* parent;
     struct node* left;
     struct node* right;
-    struct node* parent;
 };
 
 typedef struct node node;
 
-node* createnode(int x)
-{
-    struct node* newnode = (struct node*)malloc(sizeof(struct node));
-    newnode->data = x;
-    newnode->parent = NULL;
-    newnode->left = NULL;
-    newnode->right = NULL;
+node* createnode(int k){
+    struct node* newnode=(struct node*)malloc(sizeof(struct node));
+    newnode->data=k;
+    newnode->parent=NULL;
+    newnode->left=NULL;
+    newnode->right=NULL;
     return newnode;
 }
 
-void insertnode(node** head, int k,node* parent)
-{
-    if (*head == NULL)
-    {
-        *head = createnode(k);
-        (*head)->parent = parent; 
+void insertnode(node** head, int k, node* parent){
+    struct node* p=NULL;
+    struct node* x= *head;
+    struct node* z= createnode(k);
+    while (x!=NULL){
+        p=x;
+        if (z->data<x->data){
+            x=x->left;
+        }
+        else x=x->right;
     }
-    else if (k > (*head)->data)
-    {
-        insertnode(&((*head)->left), k, *head); 
+    z->parent=p;
+    if (p==NULL){
+        *head=z;
     }
-    else if (k <= (*head)->data)
-    {
-        insertnode(&((*head)->right), k, *head); 
+    else {
+        if (z->data<=p->data){
+            p->left=z;
+        }
+        else p->right=z;
     }
 }
 
-void preorder(node* node)
-{
-    if (node == NULL)
-        return;
-
-    printf("%d ", node->data);
-    preorder(node->left);
-    preorder(node->right);
+node* max(node* head){
+    if (head==NULL){
+        return head;
+    }
+    while (head->right!=NULL){
+        head=head->right;
+    }
+    return head;
 }
 
-void postorder(node* node)
-{
-    if (node == NULL)
-        return;
-    postorder(node->left);
-    postorder(node->right);
-    printf("%d ", node->data);
+node* min(node* head){
+    if (head==NULL){
+        return head;
+    }
+    while (head->left!=NULL){
+        head=head->left;
+    }
+    return head;
 }
 
-void max(node* head)
-{   
-    if(head==NULL)
-    {
-        return;
-    }
-    while (head->left != NULL)
-    {
-        head = head->left;
-    }
-    printf("%d\n", head->data);
-}
-
-int min(node* head)
-{   
-    if(head==NULL)
-    {
-        return;
-    }
-    while (head->right != NULL)
-    {
-        head = head->right;
-    }
-    return head->data;
-}
-
-node* succesor(node* node)
-{
-    if (node == NULL)
-        return NULL;
-    if (node->right)
-    {
-        return min(node->right);
-    }
-
-    struct node* successor = NULL;
-    struct node* current = node->parent;
-
-    while (current != NULL && node == current->right)
-    {
-        node = current;
-        current = current->parent;
-    }
-
-    return current;
-}
-
-node* findpredecessor(node* node){
-    if (node == NULL)
-        return NULL;
-    if (node->left!=NULL)
-        return min(node->left);
-    struct node* y=node->parent;
-    while (y!=NULL && node==y->left){
-        node=y;
+node* successors(node* x){
+    if (x!=NULL)
+        return min(x->right);
+    struct node* y=x->parent;
+    while (y!=NULL && x==y->right){
+        x=y;
         y=y->parent;
     }
- printf("%d\n",y->data);
- return y;
+    printf("%d\n",y->data);
+    return y;
 }
 
-node* search(node* root, int key)
-{
-    if (root == NULL || root->data == key)
+struct node* search(node* root, int key) {
+    if (root == NULL || root->data == key) {
         return root;
-    if (root->data < key)
-        return search(root->right, key);
-    return search(root->left, key);
+    }
+
+    if (key < root->data) {
+        return search(root->left, key);
+    }
+
+    return search(root->right, key);
 }
 
-void Preorderprint(struct node* node)
-{
-    if (node == NULL)
+
+node* predecessors(node* x){
+    if (x!=NULL)
+        return min(x->left);
+    struct node* y=x->parent;
+    while (y!=NULL && x==y->left){
+        x=y;
+        y=y->parent;
+    }
+    printf("%d\n",y->data);
+    return y; 
+}
+
+void preorder(struct node *root){
+    if (root==NULL){
         return;
-
-    printf("%d ", node->data);
-    Preorderprint(node->left);
-    Preorderprint(node->right);
+    }
+    printf(" %d ", root->data);
+    preorder(root->left);
+    preorder(root->right);
 }
 
-int main()
-{
-    struct node* root = NULL;
 
+void transplant(node* head,node* u, node* v){
+    if (u->parent==NULL){
+        head=v;
+    }
+    else if (u==u->parent->left)
+        u->parent->left=v;
+    else
+        u->parent->right=v;
+    if (v!=NULL){
+        v->parent=u->parent;
+    }
+}
+
+node* delete(node* head,node* z){
+    if (z->left==NULL) 
+        transplant(head,z,z->right);
+    else if (z->right==NULL)
+        transplant(head,z,z->left);
+    else{
+        node* y=min(z->right);
+        if (y->parent!=z)
+        {
+            transplant(head,y,y->right);
+            y->right=z->right;
+            y->right->parent=y;
+        }
+        transplant(head,z,y);
+        y->left=z->left;
+        y->left->parent=y;    
+    }
+    return head;
+}
+
+int main() {
+    struct node* root = NULL;
     char option;
     int k;
-
-    do {
+    while (1) {
         scanf(" %c", &option);
-        if (option == 'a')
-        {
+        if (option == 'a') {
             scanf(" %d", &k);
             insertnode(&root, k, NULL);
-        }   
-        else if (option == 'c')
-        {
+        } else if (option == 'd') {
             scanf(" %d", &k);
-            struct node* successor = findSuccessor(root);
+            struct node* z = search(root, k);
+            if (z) {
+                root = delete(root, z);
+                free(z);
+            }
+        } else if (option == 'c') {
+            scanf(" %d", &k);
+            struct node* successor = successors(root);
             if (successor)
                 printf("%d\n", successor->data);
             else
                 printf("-1\n");
-        }
-        else if (option == 'r')
-        {
+        } else if (option == 'r') {
             scanf(" %d", &k);
-            struct node* predecessor = findpredecessor(root);
+            struct node* predecessor = predecessors(root);
             if (predecessor)
                 printf("%d\n", predecessor->data);
             else
                 printf("-1\n");
-        }
-        else if (option == 'p')
-        {
-            if (root)
-            {
-                Preorderprint(root);
+        } else if (option == 'p') {
+            if (root) {
+                preorder(root);
                 printf("\n");
-            }
-            else
-            {
+            } else {
                 printf("-1\n");
             }
-        }
-        else if (option == 'e')
-        {
+        } else if (option == 'e') {
             break;
         }
-    } while (1);
-
-    return 1;
+    }
 }
